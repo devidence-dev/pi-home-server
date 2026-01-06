@@ -1,0 +1,20 @@
+---
+# tasks file for storage role
+
+- name: Ensure mount point directory exists
+  ansible.builtin.file:
+    path: "{{ storage_mount_path }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ setup_user }}"
+    group: "{{ setup_user }}"
+
+- name: Mount and enable the SSD drive
+  ansible.posix.mount:
+    path: "{{ storage_mount_path }}"
+    src: "UUID={{ storage_uuid }}"
+    fstype: "{{ storage_fs_type }}"
+    opts: "{{ storage_mount_options }}"
+    dump: "0"
+    passno: "0"
+    state: mounted

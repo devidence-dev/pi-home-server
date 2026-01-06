@@ -1,0 +1,6 @@
+---
+# defaults file for storage role
+storage_uuid: "tu-uuid-aqui"  # You can find this with 'blkid'
+storage_mount_path: "your/mount/path"
+storage_fs_type: "ext4"
+storage_mount_options: "defaults,auto,users,rw,nofail"  

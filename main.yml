@@ -14,3 +14,7 @@
     # The following role only runs if the hardware is a Raspberry Pi
     - role: raspberry_pi
       when: ansible_facts['board_name'] is search("Raspberry Pi")
+    - role: storage
+      when: 
+        - storage_uuid is defined
+        - storage_uuid | regex_search('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$')

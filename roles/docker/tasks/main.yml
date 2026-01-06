@@ -40,3 +40,9 @@
     name: "{{ setup_user }}"
     groups: docker
     append: true
+
+- name: Apply docker group for current session
+  ansible.builtin.command: newgrp docker
+  become_user: "{{ setup_user }}"
+  ignore_errors: true
+  changed_when: false
