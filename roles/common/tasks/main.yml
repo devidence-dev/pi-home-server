@@ -1,0 +1,42 @@
+---
+# tasks file for common role
+
+- name: Update apt cache and upgrade all packages
+  ansible.builtin.apt:
+    update_cache: true
+    upgrade: dist
+    cache_valid_time: 3600  # Only update if the cache is older than 1 hour
+
+- name: Install baseline packages
+  ansible.builtin.apt:
+    name: "{{ common_packages }}"
+    state: present
+
+- name: Ensure Neovim is the default editor (optional but helpful)
+  ansible.builtin.alternatives:
+    name: editor
+    path: /usr/bin/nvim
+
+- name: Ensure Git is installed
+  ansible.builtin.apt:
+    name: git
+    state: present
+
+- name: Configure Git user name
+  ansible.builtin.git_config:
+    name: user.name
+    scope: global
+    value: "{{ git_user_name }}"
+  when: git_user_name is defined
+
+- name: Configure Git user email
+  ansible.builtin.git_config:
+    name: user.email
+    scope: global
+    value: "{{ git_user_email }}"
+  when: git_user_email is defined 
+
+- name: Clean up unused packages
+  ansible.builtin.apt:
+    autoremove: true
+    purge: true

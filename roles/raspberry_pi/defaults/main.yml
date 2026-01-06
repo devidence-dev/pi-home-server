@@ -1,0 +1,4 @@
+---
+# defaults file for raspberry_pi
+pi_timezone: "America/Guayaquil"
+pi_locale: "en_US.UTF-8"

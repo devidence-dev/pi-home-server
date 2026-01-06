@@ -1,0 +1,24 @@
+---
+# tasks file for raspberry_pi role
+- name: Set timezone
+  community.general.timezone:
+    name: "{{ pi_timezone }}"
+
+- name: Ensure locale is generated
+  ansible.builtin.locale_gen:
+    name: "{{ pi_locale }}"
+    state: present
+
+- name: Expand root filesystem
+  ansible.builtin.command:
+    cmd: raspi-config --expand-rootfs
+  register: expand_result
+  changed_when: "'fixed' in expand_result.stdout"
+  notify: Reboot Raspberry Pi
+
+- name: Enable Docker Cgroups in cmdline.txt
+  ansible.builtin.replace:
+    path: /boot/firmware/cmdline.txt
+    regexp: '^([\w\s.\/\-=]+?)(?!.*cgroup_enable=memory)(.*)$'
+    replace: '\1\2 cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1 swapaccount=1'
+  notify: Reboot Raspberry Pi

@@ -1,0 +1,7 @@
+---
+# handlers file for raspberry_pi role
+
+- name: Reboot Raspberry Pi
+  ansible.builtin.reboot:
+    msg: "Reboot initiated by Ansible to apply Cgroup changes"
+    reboot_timeout: 600  # Wait up to 10 minutes for the Pi to return

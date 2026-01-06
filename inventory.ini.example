@@ -1,0 +1,2 @@
+[home_servers]
+test_server ansible_host=192.168.100.1 ansible_user=root

@@ -1,0 +1,16 @@
+---
+# Main entry point for the home server setup
+- name: Deploy Home Server Configuration
+  hosts: home_servers
+  become: true
+
+  # We can define global variables here or in a separate file
+  vars:
+    setup_user: "{{ ansible_user }}"
+
+  roles:
+    - role: common
+    - role: docker
+    # The following role only runs if the hardware is a Raspberry Pi
+    - role: raspberry_pi
+      when: ansible_facts['board_name'] is search("Raspberry Pi")
