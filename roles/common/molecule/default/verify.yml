@@ -1,0 +1,32 @@
+---
+# Purpose: assert that the instance really ended up in the expected state.
+# Molecule calls this playbook with `molecule verify`.
+- name: Verify
+  hosts: all
+  gather_facts: false # Quicker, if you do not need facts
+  tasks:
+    - name: Check if git is installed
+      ansible.builtin.command: git --version
+      register: git_check
+      changed_when: false
+      failed_when: git_check.rc != 0
+
+    - name: Check if neovim is installed
+      ansible.builtin.command: nvim --version
+      register: nvim_check
+      changed_when: false
+      failed_when: nvim_check.rc != 0
+
+    - name: Verify git is the default editor
+      ansible.builtin.command: update-alternatives --query editor
+      register: editor_check
+      changed_when: false
+      failed_when: "'nvim' not in editor_check.stdout"
+
+    - name: Assert git, nvim and curl are installed
+      ansible.builtin.assert:
+        that:
+          - git_check.rc == 0
+          - nvim_check.rc == 0
+          - "'nvim' in editor_check.stdout"
+        fail_msg: "Required packages are not properly installed"
