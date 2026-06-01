@@ -1,78 +1,76 @@
-# Ansible — Configuración del Home Server
+# ⚙️ Ansible — Home Server Automation
 
-Automatización completa del servidor usando Ansible. Cubre instalación de paquetes base, Docker, zsh con oh-my-zsh, k3s y Rancher.
-
----
-
-## Requisitos
-
-- `ansible-core` >= 2.15 (`pipx install ansible-core`)
-- Acceso `sudo` en el servidor destino
+Full automation for the home server setup using Ansible. Covers base packages, Docker, zsh with oh-my-zsh, k3s and Rancher.
 
 ---
 
-## Primeros pasos
+## 📋 Requirements
 
-### 1. Copiar los archivos de configuración
+- `ansible-core` >= 2.15 — `pipx install ansible-core`
+- `sudo` access on the target server
+
+---
+
+## 🚀 Getting Started
+
+### 1. Copy the configuration files
 
 ```bash
-# Inventario (elige según tu caso)
-cp inventory/local.ini.example inventory/local.ini         # si ejecutas en la misma máquina
-cp inventory/production.ini.example inventory/production.ini  # si ejecutas en un servidor remoto
+# Inventory (pick your case)
+cp inventory/local.ini.example inventory/local.ini            # running on the same machine
+cp inventory/production.ini.example inventory/production.ini  # running on a remote server
 
-# Variables del host (nombre y email para Git)
+# Host variables (your name and email for Git)
 cp host_vars/localhost.yml.example host_vars/localhost.yml
-# Editar host_vars/localhost.yml con tus datos
+# Edit host_vars/localhost.yml with your data
 ```
 
-### 2. Instalar las colecciones de Ansible
+### 2. Install Ansible collections
 
 ```bash
 ansible-galaxy collection install -r requirements.yml
 ```
 
-### 3. Ejecutar el playbook
+### 3. Run the playbook
 
 ```bash
-# Local (misma máquina)
+# Local (same machine)
 ansible-playbook main.yml -i inventory/local.ini --ask-become-pass
 
-# Servidor remoto
+# Remote server
 ansible-playbook main.yml -i inventory/production.ini --ask-become-pass
 ```
 
 ---
 
-## Roles disponibles
+## 🎭 Roles
 
-### `common`
-Paquetes base (`curl`, `ca-certificates`, `neovim`, `gnupg`, `git`), editor por defecto (neovim) y configuración global de Git.
+### 📦 `common`
+Base packages (`curl`, `ca-certificates`, `neovim`, `gnupg`, `git`), sets neovim as the default editor and configures global Git credentials.
 
-### `docker`
-Instala Docker CE desde el repositorio oficial. Crea el grupo `docker` y agrega el usuario configurado. Detecta la arquitectura automáticamente (`amd64` / `arm64`).
+### 🐳 `docker`
+Installs Docker CE from the official repository. Creates the `docker` group and adds the configured user. Automatically detects architecture (`amd64` / `arm64`).
 
-### `raspberry_pi`
-Específico para Raspberry Pi: timezone, locale, expansión del filesystem y habilitación de cgroups en `cmdline.txt` (requerido para k3s). Solo se ejecuta si el hardware es una Raspberry Pi — en cualquier otra máquina se omite.
+### 🍓 `raspberry_pi`
+Raspberry Pi specific configuration: timezone, locale, filesystem expansion and cgroups in `cmdline.txt` (required for k3s). Automatically skipped on non-Raspberry Pi hardware.
 
-### `zsh`
-Instala zsh y oh-my-zsh con los plugins `zsh-autosuggestions`, `zsh-syntax-highlighting` y `kubectl`. Genera el `.zshrc` desde un template y establece zsh como shell por defecto.
+### 🐚 `zsh`
+Installs zsh and oh-my-zsh with `zsh-autosuggestions`, `zsh-syntax-highlighting` and `kubectl` plugins. Generates `.zshrc` from a template and sets zsh as the default shell.
 
-### `k3s`
-Instala k3s (Kubernetes ligero) usando el script oficial. Espera a que el cluster esté disponible y copia el kubeconfig a `~/.kube/config`.
+### ☸️ `k3s`
+Installs k3s (lightweight Kubernetes) using the official script. Waits for the cluster to be ready and copies the kubeconfig to `~/.kube/config`.
 
-### `rancher`
-Instala Rancher vía Helm sobre k3s, incluyendo `cert-manager`. **Deshabilitado por defecto** — se activa con `rancher_enabled: true`.
+### 🐄 `rancher`
+Installs Rancher via Helm on top of k3s, including `cert-manager`. **Disabled by default** — enable it with `rancher_enabled: true`.
 
-### `storage`
-Monta una unidad de almacenamiento externa por UUID. Requiere configuración previa (ver sección Storage más abajo).
+### 💾 `storage`
+Mounts an external storage drive by UUID. Requires prior configuration (see Storage section below).
 
 ---
 
-## Comandos útiles
+## 🛠️ Useful Commands
 
-### Ejecutar solo un rol específico
-
-Cada tarea tiene tags. Puedes ejecutar solo lo que necesites:
+### Run a specific role with tags
 
 ```bash
 ansible-playbook main.yml -i inventory/local.ini --ask-become-pass --tags common
@@ -83,19 +81,19 @@ ansible-playbook main.yml -i inventory/local.ini --ask-become-pass --tags ranche
 ansible-playbook main.yml -i inventory/local.ini --ask-become-pass --tags storage
 ```
 
-### Ver qué cambiaría sin aplicar nada
+### Dry run — preview changes without applying them
 
 ```bash
 ansible-playbook main.yml -i inventory/local.ini --ask-become-pass --check --diff
 ```
 
-### Verificar sintaxis antes de ejecutar
+### Validate syntax before running
 
 ```bash
 ansible-playbook main.yml --syntax-check
 ```
 
-### Listar todas las tareas sin ejecutarlas
+### List all tasks without executing
 
 ```bash
 ansible-playbook main.yml -i inventory/local.ini --list-tasks
@@ -103,43 +101,43 @@ ansible-playbook main.yml -i inventory/local.ini --list-tasks
 
 ---
 
-## Configurar almacenamiento externo
+## 💾 Setting Up External Storage
 
-1. Obtén el UUID del disco:
+1. Find your disk UUID:
    ```bash
    blkid
    ```
 
-2. Crea el archivo de configuración desde el ejemplo:
+2. Create the config file from the example:
    ```bash
    cp roles/storage/defaults/main.yml.example roles/storage/defaults/main.yml
    ```
 
-3. Edita `roles/storage/defaults/main.yml` con tu UUID y punto de montaje.
+3. Edit `roles/storage/defaults/main.yml` with your UUID and mount point.
 
-4. Ejecuta solo ese rol:
+4. Run only the storage role:
    ```bash
    ansible-playbook main.yml -i inventory/local.ini --ask-become-pass --tags storage
    ```
 
 ---
 
-## Activar Rancher
+## 🐄 Enabling Rancher
 
-Rancher está deshabilitado por defecto porque requiere recursos considerables. Para activarlo:
+Rancher is disabled by default as it requires significant resources. To enable it:
 
-1. Asegúrate de que k3s ya esté instalado y corriendo.
+1. Make sure k3s is already installed and running.
 
-2. Añade en `host_vars/localhost.yml`:
+2. Add to `host_vars/localhost.yml`:
    ```yaml
    rancher_enabled: true
-   rancher_hostname: "rancher.tudominio.local"
-   rancher_bootstrap_password: "una-clave-segura"
+   rancher_hostname: "rancher.yourdomain.local"
+   rancher_bootstrap_password: "a-secure-password"
    ```
 
-3. Ejecuta:
+3. Run:
    ```bash
    ansible-playbook main.yml -i inventory/local.ini --ask-become-pass --tags rancher
    ```
 
-Rancher quedará disponible en `https://rancher.tudominio.local` una vez que el despliegue finalice.
+Rancher will be available at `https://rancher.yourdomain.local` once the deployment completes.
