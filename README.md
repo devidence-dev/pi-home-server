@@ -2,6 +2,14 @@
 
 This repository contains the steps for the initial configuration of a Raspberry Pi 5.
 
+## Ansible Automation ⚙️
+
+This repository includes a full Ansible setup under [`ansible/`](ansible/) that automates everything covered in this guide — packages, Docker, zsh with oh-my-zsh, k3s and Rancher.
+
+See [`ansible/README.md`](ansible/README.md) for setup instructions, available roles, and useful commands.
+
+---
+
 ## Automatic Setup Script 🚀
 
 To make the initial setup easier, this repository includes the `setup-pi.sh` script that automates most of the process.

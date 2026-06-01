@@ -1,8 +1,7 @@
 ---
-# defaults file for common role
 common_packages:
   - curl
   - ca-certificates
   - neovim
   - gnupg
-  - software-properties-common
+  - git

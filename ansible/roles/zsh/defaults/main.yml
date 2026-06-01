@@ -1,0 +1,9 @@
+---
+zsh_user: "{{ setup_user }}"
+zsh_theme: "robbyrussell"
+zsh_plugins:
+  - git
+  - zsh-autosuggestions
+  - zsh-syntax-highlighting
+  - kubectl
+zsh_lang: "en_US.UTF-8"

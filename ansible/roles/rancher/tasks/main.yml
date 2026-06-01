@@ -1,0 +1,69 @@
+---
+- name: Download Helm install script
+  ansible.builtin.get_url:
+    url: https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+    dest: /tmp/get_helm.sh
+    mode: '0755'
+  tags: [helm]
+
+- name: Install Helm
+  ansible.builtin.command:
+    cmd: /tmp/get_helm.sh
+    creates: /usr/local/bin/helm
+  tags: [helm]
+
+- name: Add cert-manager Helm repo
+  kubernetes.core.helm_repository:
+    name: jetstack
+    repo_url: https://charts.jetstack.io
+  environment:
+    KUBECONFIG: "{{ rancher_kubeconfig }}"
+  tags: [cert-manager]
+
+- name: Install cert-manager
+  kubernetes.core.helm:
+    name: cert-manager
+    chart_ref: jetstack/cert-manager
+    release_namespace: cert-manager
+    create_namespace: true
+    chart_version: "{{ cert_manager_version }}"
+    values:
+      crds:
+        enabled: true
+    wait: true
+  environment:
+    KUBECONFIG: "{{ rancher_kubeconfig }}"
+  tags: [cert-manager]
+
+- name: Add Rancher Helm repo
+  kubernetes.core.helm_repository:
+    name: rancher-stable
+    repo_url: https://releases.rancher.com/server-charts/stable
+  environment:
+    KUBECONFIG: "{{ rancher_kubeconfig }}"
+  tags: [rancher]
+
+- name: Install Rancher
+  kubernetes.core.helm:
+    name: rancher
+    chart_ref: rancher-stable/rancher
+    release_namespace: cattle-system
+    create_namespace: true
+    chart_version: "{{ rancher_version }}"
+    values:
+      hostname: "{{ rancher_hostname }}"
+      bootstrapPassword: "{{ rancher_bootstrap_password }}"
+      replicas: 1
+    wait: true
+    wait_timeout: "10m"
+  environment:
+    KUBECONFIG: "{{ rancher_kubeconfig }}"
+  tags: [rancher]
+
+- name: Wait for Rancher rollout
+  ansible.builtin.command:
+    cmd: kubectl rollout status deploy/rancher -n cattle-system --timeout=10m
+  environment:
+    KUBECONFIG: "{{ rancher_kubeconfig }}"
+  changed_when: false
+  tags: [rancher]

@@ -1,0 +1,11 @@
+---
+galaxy_info:
+  role_name: common
+  author: px1
+  description: Baseline packages and configuration for all servers
+  min_ansible_version: "2.15"
+  platforms:
+    - name: Debian
+      versions: [bookworm, trixie]
+  license: MIT
+dependencies: []

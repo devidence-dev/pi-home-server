@@ -1,0 +1,11 @@
+---
+galaxy_info:
+  role_name: storage
+  author: px1
+  description: Mount and configure external storage drives
+  min_ansible_version: "2.15"
+  platforms:
+    - name: Debian
+      versions: [bookworm, trixie]
+  license: MIT
+dependencies: []

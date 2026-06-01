@@ -1,0 +1,12 @@
+---
+galaxy_info:
+  role_name: rancher
+  author: px1
+  description: Install Rancher on k3s via Helm (includes cert-manager)
+  min_ansible_version: "2.15"
+  platforms:
+    - name: Debian
+      versions: [bookworm, trixie]
+  license: MIT
+dependencies:
+  - role: k3s

@@ -1,0 +1,43 @@
+---
+- name: Deploy Home Server Configuration
+  hosts: home_servers
+  become: true
+
+  pre_tasks:
+    - name: Read board model from device tree
+      ansible.builtin.slurp:
+        src: /sys/firmware/devicetree/base/model
+      register: board_model_raw
+      ignore_errors: true
+
+    - name: Set board_model fact
+      ansible.builtin.set_fact:
+        board_model: "{{ board_model_raw.content | b64decode }}"
+      when: board_model_raw is not failed
+
+  roles:
+    - role: common
+      tags: [common]
+
+    - role: docker
+      tags: [docker]
+
+    - role: raspberry_pi
+      when: board_model is defined and board_model is search("Raspberry Pi")
+      tags: [raspberry_pi]
+
+    - role: zsh
+      tags: [zsh]
+
+    - role: k3s
+      tags: [k3s]
+
+    - role: rancher
+      when: rancher_enabled | default(false)
+      tags: [rancher]
+
+    - role: storage
+      when:
+        - storage_uuid is defined
+        - storage_uuid | regex_search('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$')
+      tags: [storage]

@@ -1,0 +1,2 @@
+---
+setup_user: "{{ ansible_user }}"

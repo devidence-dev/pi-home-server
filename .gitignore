@@ -1,3 +1,5 @@
-inventory.ini
-roles/storage/defaults/main.yml
+ansible/inventory/local.ini
+ansible/inventory/production.ini
+ansible/host_vars/localhost.yml
+ansible/roles/storage/defaults/main.yml
 .venv

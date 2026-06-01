@@ -1,0 +1,67 @@
+---
+- name: Install zsh
+  ansible.builtin.apt:
+    name: zsh
+    state: present
+  tags: [packages]
+
+- name: Check if oh-my-zsh is installed
+  ansible.builtin.stat:
+    path: "/home/{{ zsh_user }}/.oh-my-zsh"
+  register: omz_stat
+  tags: [zsh]
+
+- name: Download oh-my-zsh install script
+  ansible.builtin.get_url:
+    url: https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh
+    dest: /tmp/install_omz.sh
+    mode: '0755'
+  when: not omz_stat.stat.exists
+  tags: [zsh]
+
+- name: Install oh-my-zsh
+  ansible.builtin.command: /tmp/install_omz.sh --unattended
+  become: true
+  become_user: "{{ zsh_user }}"
+  environment:
+    HOME: "/home/{{ zsh_user }}"
+    ZSH: "/home/{{ zsh_user }}/.oh-my-zsh"
+    CHSH: "no"
+    RUNZSH: "no"
+  when: not omz_stat.stat.exists
+  tags: [zsh]
+
+- name: Install zsh-autosuggestions plugin
+  ansible.builtin.git:
+    repo: https://github.com/zsh-users/zsh-autosuggestions
+    dest: "/home/{{ zsh_user }}/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
+    version: master
+    update: false
+  become: true
+  become_user: "{{ zsh_user }}"
+  tags: [zsh, plugins]
+
+- name: Install zsh-syntax-highlighting plugin
+  ansible.builtin.git:
+    repo: https://github.com/zsh-users/zsh-syntax-highlighting
+    dest: "/home/{{ zsh_user }}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting"
+    version: master
+    update: false
+  become: true
+  become_user: "{{ zsh_user }}"
+  tags: [zsh, plugins]
+
+- name: Deploy .zshrc
+  ansible.builtin.template:
+    src: zshrc.j2
+    dest: "/home/{{ zsh_user }}/.zshrc"
+    owner: "{{ zsh_user }}"
+    group: "{{ zsh_user }}"
+    mode: '0644'
+  tags: [zsh, configuration]
+
+- name: Set zsh as default shell
+  ansible.builtin.user:
+    name: "{{ zsh_user }}"
+    shell: /usr/bin/zsh
+  tags: [configuration]

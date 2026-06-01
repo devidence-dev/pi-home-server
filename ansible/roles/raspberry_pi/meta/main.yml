@@ -1,0 +1,11 @@
+---
+galaxy_info:
+  role_name: raspberry_pi
+  author: px1
+  description: Raspberry Pi specific configuration (timezone, locale, filesystem, cgroups)
+  min_ansible_version: "2.15"
+  platforms:
+    - name: Debian
+      versions: [bookworm, trixie]
+  license: MIT
+dependencies: []

@@ -1,0 +1,6 @@
+---
+rancher_hostname: "rancher.local"
+rancher_bootstrap_password: "admin"
+rancher_version: "2.9.0"
+cert_manager_version: "v1.14.4"
+rancher_kubeconfig: /etc/rancher/k3s/k3s.yaml

@@ -1,0 +1,3 @@
+---
+k3s_exec_args: "--write-kubeconfig-mode 644"
+k3s_kubeconfig: /etc/rancher/k3s/k3s.yaml
