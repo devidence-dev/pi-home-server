@@ -35,6 +35,10 @@
       when: k3s_enabled | default(true)
       tags: [k3s]
 
+    - role: cert_manager
+      when: cert_manager_enabled | default(false)
+      tags: [cert_manager]
+
     - role: rancher
       when: rancher_enabled | default(false)
       tags: [rancher]

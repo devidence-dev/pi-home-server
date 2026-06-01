@@ -1,0 +1,21 @@
+---
+cert_manager_version: "1.20.2"
+cert_manager_namespace: cert-manager
+cert_manager_kubeconfig: /etc/rancher/k3s/k3s.yaml
+cert_manager_resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 128Mi
+
+# Set in host_vars/localhost.yml
+cloudflare_api_token: ""
+acme_email: ""
+acme_server: "https://acme-v02.api.letsencrypt.org/directory"
+
+# Domain for the wildcard certificate (e.g. lab.devidence.dev)
+# Generates certs for <domain> and *.<domain>
+wildcard_domain: ""
+wildcard_namespace: cattle-system

@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ wildcard_domain | replace('.', '-') }}-wildcard
+  namespace: {{ wildcard_namespace }}
+spec:
+  secretName: {{ wildcard_domain | replace('.', '-') }}-wildcard-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+    - "{{ wildcard_domain }}"
+    - "*.{{ wildcard_domain }}"

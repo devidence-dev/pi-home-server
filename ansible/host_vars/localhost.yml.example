@@ -7,12 +7,21 @@ git_user_email: "your@email.com"
 docker_enabled: true
 zsh_enabled: true
 k3s_enabled: true
+cert_manager_enabled: false
 rancher_enabled: false
 storage_enabled: false
 
+# --- cert-manager / TLS (required if cert_manager_enabled: true) ---
+# acme_email: "your@email.com"
+# cloudflare_api_token: ""         # generate: openssl rand -base64 32
+# wildcard_domain: "lab.yourdomain.com"
+
 # --- Storage (required if storage_enabled: true) ---
-# storage_uuid: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"  # find it with: blkid
+# storage_uuid: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"  # find with: blkid
 
 # --- Rancher (required if rancher_enabled: true) ---
-# rancher_hostname: "rancher.yourdomain.local"
-# rancher_bootstrap_password: "a-secure-password"
+# rancher_hostname: "rancher.lab.yourdomain.com"
+# rancher_bootstrap_password: ""   # generate: openssl rand -base64 32
+
+# --- Ansible Become Password ---
+ansible_become_password: "YOUR_SUDO_PASSWORD"

@@ -1,0 +1,94 @@
+---
+- name: Download Helm install script
+  ansible.builtin.get_url:
+    url: https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+    dest: /tmp/get_helm.sh
+    mode: '0755'
+  tags: [cert_manager]
+
+- name: Install Helm
+  ansible.builtin.command:
+    cmd: /tmp/get_helm.sh
+    creates: /usr/local/bin/helm
+  tags: [cert_manager]
+
+- name: Add cert-manager Helm repo
+  kubernetes.core.helm_repository:
+    name: jetstack
+    repo_url: https://charts.jetstack.io
+  environment:
+    KUBECONFIG: "{{ cert_manager_kubeconfig }}"
+  tags: [cert_manager]
+
+- name: Install or upgrade cert-manager
+  kubernetes.core.helm:
+    name: cert-manager
+    chart_ref: jetstack/cert-manager
+    release_namespace: "{{ cert_manager_namespace }}"
+    create_namespace: true
+    chart_version: "{{ cert_manager_version }}"
+    values:
+      crds:
+        enabled: true
+      resources:
+        requests:
+          cpu: "{{ cert_manager_resources.requests.cpu }}"
+          memory: "{{ cert_manager_resources.requests.memory }}"
+        limits:
+          cpu: "{{ cert_manager_resources.limits.cpu }}"
+          memory: "{{ cert_manager_resources.limits.memory }}"
+    wait: true
+    wait_timeout: "5m"
+  environment:
+    KUBECONFIG: "{{ cert_manager_kubeconfig }}"
+  tags: [cert_manager]
+
+- name: Wait for cert-manager pods to be ready
+  ansible.builtin.command:
+    cmd: kubectl wait pod --all -n {{ cert_manager_namespace }} --for=condition=Ready --timeout=120s
+  environment:
+    KUBECONFIG: "{{ cert_manager_kubeconfig }}"
+  changed_when: false
+  tags: [cert_manager]
+
+- name: Create Cloudflare API token secret
+  ansible.builtin.shell: |
+    kubectl create secret generic cloudflare-api-token \
+      --namespace {{ cert_manager_namespace }} \
+      --from-literal=api-token={{ cloudflare_api_token }} \
+      --dry-run=client -o yaml | kubectl apply -f -
+  environment:
+    KUBECONFIG: "{{ cert_manager_kubeconfig }}"
+  no_log: true
+  changed_when: false
+  tags: [cert_manager]
+
+- name: Apply ClusterIssuer
+  ansible.builtin.shell: kubectl apply -f -
+  args:
+    stdin: "{{ lookup('template', 'cluster-issuer.yml.j2') }}"
+  environment:
+    KUBECONFIG: "{{ cert_manager_kubeconfig }}"
+  changed_when: false
+  tags: [cert_manager]
+
+- name: Apply wildcard Certificate
+  ansible.builtin.shell: kubectl apply -f -
+  args:
+    stdin: "{{ lookup('template', 'certificate.yml.j2') }}"
+  environment:
+    KUBECONFIG: "{{ cert_manager_kubeconfig }}"
+  changed_when: false
+  tags: [cert_manager]
+
+- name: Wait for wildcard certificate to be issued
+  ansible.builtin.command:
+    cmd: >
+      kubectl wait certificate/{{ wildcard_domain | replace('.', '-') }}-wildcard
+      -n {{ wildcard_namespace }}
+      --for=condition=Ready
+      --timeout=300s
+  environment:
+    KUBECONFIG: "{{ cert_manager_kubeconfig }}"
+  changed_when: false
+  tags: [cert_manager]

@@ -1,2 +1,2 @@
 ---
-setup_user: "{{ ansible_user }}"
+setup_user: "{{ ansible_facts['user_id'] }}"

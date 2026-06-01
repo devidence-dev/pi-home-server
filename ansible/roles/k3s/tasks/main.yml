@@ -1,4 +1,22 @@
 ---
+- name: Check memory cgroup is active (v1 or v2)
+  ansible.builtin.shell: |
+    grep -q memory /sys/fs/cgroup/cgroup.controllers 2>/dev/null || \
+    grep -qE "^memory\s+[0-9]+\s+[0-9]+\s+1" /proc/cgroups 2>/dev/null
+  register: cgroup_active
+  failed_when: false
+  changed_when: false
+  tags: [k3s]
+
+- name: Fail if cgroups are not active yet
+  ansible.builtin.fail:
+    msg: >
+      Memory cgroup is not active. The raspberry_pi role updated /boot/firmware/cmdline.txt
+      but a reboot is required before k3s can be installed.
+      Please reboot and re-run with: ansible-playbook main.yml -i inventory/local.ini --tags k3s
+  when: cgroup_active.rc != 0
+  tags: [k3s]
+
 - name: Download k3s install script
   ansible.builtin.get_url:
     url: https://get.k3s.io

@@ -1,0 +1,12 @@
+---
+galaxy_info:
+  role_name: cert_manager
+  author: px1
+  description: Install cert-manager with Cloudflare DNS01 and issue a wildcard Let's Encrypt certificate
+  min_ansible_version: "2.15"
+  platforms:
+    - name: Debian
+      versions: [bookworm, trixie]
+  license: MIT
+dependencies:
+  - role: k3s
