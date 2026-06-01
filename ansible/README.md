@@ -68,6 +68,28 @@ Mounts an external storage drive by UUID. Requires prior configuration (see Stor
 
 ---
 
+## 🎛️ Enabling & Disabling Roles
+
+Each optional role is controlled by an `*_enabled` variable in `host_vars/localhost.yml`. No need to touch the playbook.
+
+| Variable | Default | Description |
+|---|---|---|
+| `docker_enabled` | `true` | Install Docker CE |
+| `zsh_enabled` | `true` | Install zsh + oh-my-zsh |
+| `k3s_enabled` | `true` | Install k3s |
+| `rancher_enabled` | `false` | Install Rancher (requires k3s) |
+| `storage_enabled` | `false` | Mount external storage drive |
+
+Example — run everything except Docker and k3s:
+
+```yaml
+# host_vars/localhost.yml
+docker_enabled: false
+k3s_enabled: false
+```
+
+---
+
 ## 🛠️ Useful Commands
 
 ### Run a specific role with tags

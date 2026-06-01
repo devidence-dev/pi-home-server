@@ -1,3 +1,18 @@
 ---
+# --- Git ---
 git_user_name: "Your Name"
 git_user_email: "your@email.com"
+
+# --- Roles ---
+docker_enabled: true
+zsh_enabled: true
+k3s_enabled: true
+rancher_enabled: false
+storage_enabled: false
+
+# --- Storage (required if storage_enabled: true) ---
+# storage_uuid: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"  # find it with: blkid
+
+# --- Rancher (required if rancher_enabled: true) ---
+# rancher_hostname: "rancher.yourdomain.local"
+# rancher_bootstrap_password: "a-secure-password"

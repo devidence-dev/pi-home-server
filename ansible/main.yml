@@ -20,6 +20,7 @@
       tags: [common]
 
     - role: docker
+      when: docker_enabled | default(true)
       tags: [docker]
 
     - role: raspberry_pi
@@ -27,9 +28,11 @@
       tags: [raspberry_pi]
 
     - role: zsh
+      when: zsh_enabled | default(true)
       tags: [zsh]
 
     - role: k3s
+      when: k3s_enabled | default(true)
       tags: [k3s]
 
     - role: rancher
@@ -38,6 +41,7 @@
 
     - role: storage
       when:
+        - storage_enabled | default(false)
         - storage_uuid is defined
         - storage_uuid | regex_search('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$')
       tags: [storage]
