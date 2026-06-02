@@ -1,7 +1,7 @@
 ---
 rancher_hostname: "rancher.local"
 rancher_bootstrap_password: "admin"
-rancher_version: "2.9.0"
+rancher_version: "2.14.2"
 rancher_kubeconfig: /etc/rancher/k3s/k3s.yaml
 rancher_ingress_class: traefik
 rancher_tls_secret_name: "{{ wildcard_domain | replace('.', '-') }}-wildcard-tls"

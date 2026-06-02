@@ -1,0 +1,99 @@
+---
+- name: Uninstall Home Server Configuration
+  hosts: home_servers
+  become: true
+
+  tasks:
+    - name: Uninstall k3s
+      ansible.builtin.command:
+        cmd: /usr/local/bin/k3s-uninstall.sh
+        removes: /usr/local/bin/k3s
+      tags: [k3s]
+
+    - name: Stop Docker service
+      ansible.builtin.systemd:
+        name: docker
+        state: stopped
+        enabled: false
+      ignore_errors: true
+      tags: [docker]
+
+    - name: Uninstall Docker packages
+      ansible.builtin.apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+          - python3-debian
+        state: absent
+        purge: true
+      tags: [docker]
+
+    - name: Remove Docker apt repository
+      ansible.builtin.file:
+        path: /etc/apt/sources.list.d/docker.sources
+        state: absent
+      tags: [docker]
+
+    - name: Remove Docker GPG key
+      ansible.builtin.file:
+        path: /etc/apt/keyrings/docker.asc
+        state: absent
+      tags: [docker]
+
+    - name: Remove Docker data directory
+      ansible.builtin.file:
+        path: /var/lib/docker
+        state: absent
+      tags: [docker]
+
+    - name: Remove docker group
+      ansible.builtin.group:
+        name: docker
+        state: absent
+      tags: [docker]
+
+    - name: Reset default shell to bash
+      ansible.builtin.user:
+        name: "{{ ansible_facts['user_id'] }}"
+        shell: /bin/bash
+      tags: [zsh]
+
+    - name: Remove oh-my-zsh
+      ansible.builtin.file:
+        path: "/home/{{ ansible_facts['user_id'] }}/.oh-my-zsh"
+        state: absent
+      tags: [zsh]
+
+    - name: Remove .zshrc
+      ansible.builtin.file:
+        path: "/home/{{ ansible_facts['user_id'] }}/.zshrc"
+        state: absent
+      tags: [zsh]
+
+    - name: Uninstall zsh
+      ansible.builtin.apt:
+        name: zsh
+        state: absent
+        purge: true
+      tags: [zsh]
+
+    - name: Remove Helm
+      ansible.builtin.file:
+        path: /usr/local/bin/helm
+        state: absent
+      tags: [rancher, cert_manager]
+
+    - name: Remove kubeconfig from user home
+      ansible.builtin.file:
+        path: "/home/{{ ansible_facts['user_id'] }}/.kube"
+        state: absent
+      tags: [k3s]
+
+    - name: Autoremove unused packages
+      ansible.builtin.apt:
+        autoremove: true
+        purge: true
+      tags: [always]

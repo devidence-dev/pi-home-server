@@ -72,6 +72,22 @@
   changed_when: false
   tags: [cert_manager]
 
+- name: Ensure wildcard namespace exists
+  ansible.builtin.command:
+    cmd: kubectl create namespace {{ wildcard_namespace }} --dry-run=client -o yaml
+  register: ns_yaml
+  changed_when: false
+  tags: [cert_manager]
+
+- name: Apply wildcard namespace
+  ansible.builtin.shell: kubectl apply -f -
+  args:
+    stdin: "{{ ns_yaml.stdout }}"
+  environment:
+    KUBECONFIG: "{{ cert_manager_kubeconfig }}"
+  changed_when: false
+  tags: [cert_manager]
+
 - name: Apply wildcard Certificate
   ansible.builtin.shell: kubectl apply -f -
   args:

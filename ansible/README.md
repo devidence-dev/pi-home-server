@@ -45,6 +45,89 @@ ansible-playbook main.yml -i inventory/production.ini
 
 ---
 
+## 📐 Full Installation Order
+
+Some roles depend on others being installed first. Follow this order on a fresh server:
+
+**Step 1 — Base setup** (packages, Docker, zsh)
+```bash
+ansible-playbook main.yml -i inventory/local.ini
+```
+> 🍓 On Raspberry Pi this will fail on k3s with a message asking you to reboot. That is expected — continue to Step 2.
+
+**Step 2 — Reboot** *(Raspberry Pi only — to activate cgroups)*
+```bash
+sudo reboot
+```
+
+**Step 3 — Install k3s**
+```bash
+ansible-playbook main.yml -i inventory/local.ini --tags k3s
+```
+
+**Step 4 — Install cert-manager + wildcard TLS** *(optional, requires Cloudflare token)*
+
+Enable it in `host_vars/localhost.yml` first:
+```yaml
+cert_manager_enabled: true
+acme_email: "your@email.com"
+cloudflare_api_token: "your-token"
+wildcard_domain: "lab.yourdomain.com"
+```
+```bash
+ansible-playbook main.yml -i inventory/local.ini --tags cert_manager
+```
+> ⏳ Certificate issuance can take 1–3 minutes while Let's Encrypt validates the DNS challenge.
+
+**Step 5 — Install Rancher** *(optional, requires cert_manager)*
+
+Enable it in `host_vars/localhost.yml` first:
+```yaml
+rancher_enabled: true
+rancher_hostname: "rancher.lab.yourdomain.com"
+rancher_bootstrap_password: "your-secure-password"
+```
+```bash
+ansible-playbook main.yml -i inventory/local.ini --tags rancher
+```
+
+**Step 6 — Storage** *(optional)*
+```bash
+ansible-playbook main.yml -i inventory/local.ini --tags storage
+```
+
+---
+
+## 🧹 Clean Reinstall
+
+Use `uninstall.yml` to wipe everything and start fresh.
+
+```bash
+ansible-playbook uninstall.yml -i inventory/local.ini
+```
+
+This removes: k3s (and everything running in it), Docker, zsh + oh-my-zsh, Helm, and the kubeconfig. Base packages installed by `common` (`git`, `neovim`, etc.) are left in place.
+
+You can also uninstall selectively with tags:
+
+```bash
+ansible-playbook uninstall.yml -i inventory/local.ini --tags k3s
+ansible-playbook uninstall.yml -i inventory/local.ini --tags docker
+ansible-playbook uninstall.yml -i inventory/local.ini --tags zsh
+```
+
+### One-run reinstall
+
+After uninstalling, a full reinstall runs in **one single command** — as long as cgroups are already active (they are if the Pi was already configured before):
+
+```bash
+ansible-playbook main.yml -i inventory/local.ini
+```
+
+> 🍓 On a **brand new Raspberry Pi** (cgroups never enabled), the first run will stop at k3s and ask for a reboot. After rebooting, re-run the same command and everything will complete. See the section below for details.
+
+---
+
 ## 🍓 First Run on Raspberry Pi — Important
 
 k3s requires cgroups to be active. The `raspberry_pi` role enables them by writing to `/boot/firmware/cmdline.txt`, but **a reboot is needed before they take effect**. Because of this, the first full run requires two steps:
